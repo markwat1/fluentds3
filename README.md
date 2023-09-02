@@ -13,10 +13,12 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 * `cdk diff`        compare deployed stack with current state
 * `cdk synth`       emits the synthesized CloudFormation template
 
-#create s3 bucket
-#setup role for s3 bucket putobject
-#install td-agent fluentd
+# create s3 bucket
+# setup role for s3 bucket putobject
+# install td-agent fluentd
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent3.sh | sh
+# install fluent-bit
+curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
 
 # setup /etc/init.d/td-agent 
  td-agent to root
