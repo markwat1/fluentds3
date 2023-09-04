@@ -50,7 +50,7 @@ export class FluentbitStack extends cdk.Stack {
     });
     // log store policy
     const s3PutObjectPolicyStatement = new iam.PolicyStatement({
-      actions:['s3:PutObject'],
+      actions:['s3:PutObject','s3:GetObject','s3:GetObjectAttributes'],
       resources:[logBucket.bucketArn + '/*'],
       effect:iam.Effect.ALLOW,
     });
