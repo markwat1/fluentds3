@@ -15,10 +15,14 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 # create s3 bucket
 # setup role for s3 bucket putobject
-# install td-agent fluentd
-curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent3.sh | sh
+### fluent-bit
 # install fluent-bit
 curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
+
+
+### td agent
+# install td-agent fluentd
+curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent3.sh | sh
 
 # setup /etc/init.d/td-agent 
  td-agent to root
@@ -26,12 +30,12 @@ curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
  td-agent to root
 # setup /etc/td-agent/td-agent.conf
 # source instance
- <match td.messages.access>
+<match td.messages.access>
   @type forward
   <server>
     name fluentd-server
-    host 10.0.3.214
-    port 2424
+    host 10.0.1.149
+    port 24224
   </server>
 </match>
 <source>
@@ -52,7 +56,7 @@ curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
 </source>
 <source>
   @type forward
-  port 2424
+  port 24224
   bind 0.0.0.0
   @id input_forward
   tag td.messages.forwarded
