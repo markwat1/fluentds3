@@ -13,23 +13,35 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 * `cdk diff`        compare deployed stack with current state
 * `cdk synth`       emits the synthesized CloudFormation template
 
-# create s3 bucket
-# setup role for s3 bucket putobject
-### fluent-bit
-# install fluent-bit
-curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
-
-
-### td agent
-# install td-agent fluentd
+# requirements for password generator
+```
+npm install mersenne-twister
+npm install --save @types/mersenne-twister
+```
+# Prepare
+create s3 bucket
+# setup permission for ec2 to access S3
+s3:PutObject
+s3:GetObject
+s3:GetObjectAttributes
+# setup td agent
+## install td-agent(fluentd)
+```
 curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent3.sh | sh
-
-# setup /etc/init.d/td-agent 
- td-agent to root
-# setup  /usr/lib/systemd/system/td-agent.service
- td-agent to root
-# setup /etc/td-agent/td-agent.conf
-# source instance
+```
+## setup /etc/init.d/td-agent 
+```
+sed -i 's/TD_AGENT_USER=td-agent/TD_AGENT_USER=root/' /etc/init.d/td-agent
+sed -i 's/TD_AGENT_GROUP=td-agent/TD_AGENT_GROUP=root/' /etc/init.d/td-agent
+```
+## setup  /usr/lib/systemd/system/td-agent.service
+```
+sed -i 's/User=td-agent/User=root/' /usr/lib/systemd/system/td-agent.service
+sed -i 's/Group=td-agent/Group=root/' /usr/lib/systemd/system/td-agent.service
+```
+## source instance
+### setup /etc/td-agent/td-agent.conf
+```
 <match td.messages.access>
   @type forward
   <server>
@@ -45,8 +57,10 @@ curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent3.sh | sh
   pos_file /var/log/td-agent/messages.pos
   format syslog
 </source>
-
-# forwarder instance
+```
+## forwarder instance
+### setup /etc/td-agent/td-agent.conf
+```
 <source>
   @type tail
   path /var/log/messages
@@ -67,4 +81,4 @@ curl -L https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent3.sh | sh
   s3_region ap-northeast-1
   time_slice_format forwarded-%Y%m%d%H%M
 </match>
-
+```
