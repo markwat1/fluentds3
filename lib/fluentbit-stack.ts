@@ -72,7 +72,7 @@ export class FluentbitStack extends cdk.Stack {
     forwarder.getInstance().addToRolePolicy(s3PutObjectPolicyStatement);
     forwarder.getInstance().addToRolePolicy(s3ListBucketPolicyStatement);
     // setup forwarder userdata
-    const forwarderUserDataSource = fs.readFileSync('./lib/forwarder-ud.sh','utf8');
+    const forwarderUserDataSource = fs.readFileSync('./lib/ud/forwarder-ud.sh','utf8');
     const forwarderReplaceValues = {
       __LOG_BUCKET_NAME__: logBucket.bucketName,
       __FLUENTD_PORT__ : fluentdPort.toString(),
@@ -94,7 +94,7 @@ export class FluentbitStack extends cdk.Stack {
       }));
     }
     // setup sender userdata
-    const senderUserDataSource = fs.readFileSync('./lib/sender-ud.sh','utf8');
+    const senderUserDataSource = fs.readFileSync('./lib/ud/sender-ud.sh','utf8');
     // const pwg = new pg.PasswordGenerator();
     // const defaultEscapeChars = '\\`"$';
     // const dbPassword = pwg.generate({length:24});

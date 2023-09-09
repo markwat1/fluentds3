@@ -18,6 +18,10 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 npm install mersenne-twister
 npm install --save @types/mersenne-twister
 ```
+# build cert file
+```
+openssl req -new -x509 -sha256 -days 10800 -newkey rsa:4096 -keyout cert/fluentd.key -out cert/fluentd.crt
+```
 # Prepare
 create s3 bucket
 # setup permission for ec2 to access S3

@@ -29,6 +29,14 @@ echo '  port __FLUENTD_PORT__' >> /etc/td-agent/td-agent.conf
 echo '  bind 0.0.0.0' >> /etc/td-agent/td-agent.conf
 echo '  @id input_forward' >> /etc/td-agent/td-agent.conf
 echo '  tag td.messages.forwarded' >> /etc/td-agent/td-agent.conf
+echo '  <transport tls>' >> /etc/td-agent/td-agent.conf
+echo '    version TLS1_2' >> /etc/td-agent/td-agent.conf
+echo '    ciphers ALL:!aNULL:!eNULL:!SSLv2' >> /etc/td-agent/td-agent.conf
+echo '    insecure false' >> /etc/td-agent/td-agent.conf
+echo '    ca_cert_path /etc/pki/tls/certs/fluent.crt' >> /etc/td-agent/td-agent.conf
+echo '    ca_private_key_path /etc/pki/tls/certs/fluent.key' >> /etc/td-agent/td-agent.conf
+echo '    ca_private_key_passphrase "fluent-cert-pass"' >> /etc/td-agent/td-agent.conf
+echo '  </transport>' >> /etc/td-agent/td-agent.conf
 echo '</source>' >> /etc/td-agent/td-agent.conf
 systemctl enable td-agent
 systemctl start td-agent

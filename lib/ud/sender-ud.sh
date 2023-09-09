@@ -12,6 +12,8 @@ sed -i 's/User=td-agent/User=root/' /usr/lib/systemd/system/td-agent.service
 sed -i 's/Group=td-agent/Group=root/' /usr/lib/systemd/system/td-agent.service
 echo '<match td.messages.access>' > /etc/td-agent/td-agent.conf
 echo '  @type forward' >> /etc/td-agent/td-agent.conf
+echo '  transport tls' >> /etc/td-agent/td-agent.conf
+echo '  tls_verify_hostname false' >> /etc/td-agent/td-agent.conf
 echo '  <server>' >> /etc/td-agent/td-agent.conf
 echo '    name fluentd-server' >> /etc/td-agent/td-agent.conf
 echo '    host __FORWARDER_IP_ADDRESS__' >> /etc/td-agent/td-agent.conf
