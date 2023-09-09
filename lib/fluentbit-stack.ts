@@ -60,6 +60,12 @@ export class FluentbitStack extends cdk.Stack {
       effect:iam.Effect.ALLOW,
     });
     // build forwarder
+    const forwarderTdAgentConfSource  = fs.readFileSync('./lib/conf/forwarder-td-agent.conf','utf8');
+    const forwarderTdAgentReplaceValues = {
+      __LOG_BUCKET_NAME__: logBucket.bucketName,
+      __FLUENTD_PORT__ : fluentdPort.toString(),
+    };
+    const forwarderTdAgentConf = pg.replaceStrings(forwarderTdAgentConfSource,forwarderTdAgentReplaceValues);
     const forwarder = new Ec2Instance(this,'forwarder' ,{
       vpc: vpc.getVpc(),
       name:'forwarder',
@@ -68,19 +74,25 @@ export class FluentbitStack extends cdk.Stack {
       instanceClass: ec2.InstanceClass.T4G,
       instanceSize: ec2.InstanceSize.NANO,
       ec2SecurityGroup: forwarderSecurityGroup,
+      init: ec2.CloudFormationInit.fromElements(
+        ec2.InitFile.fromFileInline('/etc/td-agent/fluentd.crt','./cert/fluentd.crt',{}),
+        ec2.InitFile.fromFileInline('/etc/td-agent/fluentd.key','./cert/fluentd.key',{}),
+        ec2.InitFile.fromString('/etc/td-agent/td-agent.conf',forwarderTdAgentConf),
+        ),
     })
     forwarder.getInstance().addToRolePolicy(s3PutObjectPolicyStatement);
     forwarder.getInstance().addToRolePolicy(s3ListBucketPolicyStatement);
     // setup forwarder userdata
-    const forwarderUserDataSource = fs.readFileSync('./lib/ud/forwarder-ud.sh','utf8');
-    const forwarderReplaceValues = {
-      __LOG_BUCKET_NAME__: logBucket.bucketName,
-      __FLUENTD_PORT__ : fluentdPort.toString(),
-    };
-    const forwarderUserDataScript = pg.replaceStrings(forwarderUserDataSource,forwarderReplaceValues);
+    const forwarderUserDataScript = fs.readFileSync('./lib/ud/forwarder-ud.sh','utf8');
     forwarder.getInstance().addUserData(forwarderUserDataScript);
 
     // build sender Instances
+    const senderTdAgentConfSource  = fs.readFileSync('./lib/conf/sender-td-agent.conf','utf8');
+    const senderTdAgentReplaceValues = {
+      __FORWARDER_IP_ADDRESS__: forwarder.getInstance().instancePrivateIp,
+      __FLUENTD_PORT__ : fluentdPort.toString(),
+    };
+    const senderTdAgentConf = pg.replaceStrings(senderTdAgentConfSource,senderTdAgentReplaceValues);
     let senders:Ec2Instance[] = [];
     for(const az of availabilityZones){
       senders.push( new Ec2Instance(this,'sender-' + az,{
@@ -91,18 +103,14 @@ export class FluentbitStack extends cdk.Stack {
         instanceClass: ec2.InstanceClass.T4G,
         instanceSize: ec2.InstanceSize.NANO,
         ec2SecurityGroup: senderSecurityGroup,
-      }));
+        init: ec2.CloudFormationInit.fromElements(
+          ec2.InitFile.fromFileInline('/etc/td-agent/fluentd.crt','./cert/fluentd.crt',{}),
+          ec2.InitFile.fromString('/etc/td-agent/td-agent.conf',senderTdAgentConf),
+        ),
+        }));
     }
     // setup sender userdata
-    const senderUserDataSource = fs.readFileSync('./lib/ud/sender-ud.sh','utf8');
-    // const pwg = new pg.PasswordGenerator();
-    // const defaultEscapeChars = '\\`"$';
-    // const dbPassword = pwg.generate({length:24});
-    const senderReplaceValues = {
-      __FORWARDER_IP_ADDRESS__: forwarder.getInstance().instancePrivateIp,
-      __FLUENTD_PORT__ : fluentdPort.toString(),
-    };
-    const senderUserDataScript = pg.replaceStrings(senderUserDataSource,senderReplaceValues);
+    const senderUserDataScript = fs.readFileSync('./lib/ud/sender-ud.sh','utf8');
     for(const instance of senders){
       instance.getInstance().addUserData(senderUserDataScript);
     }

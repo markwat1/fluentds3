@@ -10,6 +10,7 @@ interface Ec2InsntaceProps {
   instanceClass: ec2.InstanceClass;
   instanceSize: ec2.InstanceSize;
   ec2SecurityGroup: ec2.SecurityGroup;
+  init?:ec2.CloudFormationInit;
 };
 const gravitonClasses = [
   ec2.InstanceClass.MEMORY6_GRAVITON,
@@ -83,6 +84,7 @@ export class Ec2Instance extends Construct {
         machineImage: machineImage,
         securityGroup: props.ec2SecurityGroup,
         requireImdsv2: true,
+        init:props.init,
 /*        role:smRole,*/
       });
     }else{
@@ -95,6 +97,7 @@ export class Ec2Instance extends Construct {
         machineImage: machineImage,
         securityGroup: props.ec2SecurityGroup,
         requireImdsv2: true,
+        init:props.init,
 /*        role:smRole,*/
       });
     }
