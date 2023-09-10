@@ -63,7 +63,7 @@ export class FluentbitStack extends cdk.Stack {
     // build cert files
     const pwg = new pg.PasswordGenerator();
     const certPass = pwg.generate({length:10,useSymbol:false});
-    execSync(`openssl req -new -x509 -sha256 -days 10800 -newkey rsa:4096 -keyout cert/fluentd.key -out cert/fluentd.crt -passout pass:${certPass} < cert.input`);
+    execSync(`openssl req -new -x509 -sha256 -days 10800 -newkey rsa:4096 -keyout cert/fluentd.key -out cert/fluentd.crt -passout pass:${certPass} < cert/cert.input`);
     // build forwarder
     const forwarderTdAgentConfSource  = fs.readFileSync('./lib/conf/forwarder-td-agent.conf','utf8');
     const forwarderTdAgentReplaceValues = {

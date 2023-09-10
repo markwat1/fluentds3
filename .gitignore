@@ -7,4 +7,5 @@ node_modules
 .cdk.staging
 cdk.out
 # cert file 
-cert/*
+cert/*.key
+cert/*.crt
