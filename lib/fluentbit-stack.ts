@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import { aws_ec2 as ec2} from 'aws-cdk-lib';
 import { aws_s3 as s3 } from 'aws-cdk-lib';
 import { aws_iam as iam } from 'aws-cdk-lib';
+import { execSync } from 'child_process';
 
 import { Ec2Instance} from './ec2';
 import { Eic } from './eic';
@@ -59,11 +60,16 @@ export class FluentbitStack extends cdk.Stack {
       resources:[logBucket.bucketArn],
       effect:iam.Effect.ALLOW,
     });
+    // build cert files
+    const pwg = new pg.PasswordGenerator();
+    const certPass = pwg.generate({length:10,useSymbol:false});
+    execSync(`openssl req -new -x509 -sha256 -days 10800 -newkey rsa:4096 -keyout cert/fluentd.key -out cert/fluentd.crt -passout pass:${certPass} < cert/cert.input`);
     // build forwarder
     const forwarderTdAgentConfSource  = fs.readFileSync('./lib/conf/forwarder-td-agent.conf','utf8');
     const forwarderTdAgentReplaceValues = {
       __LOG_BUCKET_NAME__: logBucket.bucketName,
       __FLUENTD_PORT__ : fluentdPort.toString(),
+      __CERT_PASS__ : certPass,
     };
     const forwarderTdAgentConf = pg.replaceStrings(forwarderTdAgentConfSource,forwarderTdAgentReplaceValues);
     const forwarder = new Ec2Instance(this,'forwarder' ,{
